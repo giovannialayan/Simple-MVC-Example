@@ -20,7 +20,7 @@ const hostIndex = (req, res) => {
 
 const hostPage1 = async (req, res) => {
   try {
-    const docs = await Cat.find({}).exec();
+    const docs = await Cat.find({}).lean().exec();
 
     return res.render('page1', {
       cats: docs,
@@ -72,14 +72,39 @@ const setName = async (req, res) => {
   }
 };
 
-const searchName = (req, res) => {
+const searchName = async (req, res) => {
   if (!req.query.name) {
     return res.status(400).json({ error: 'Name is required to perform a search' });
+  }
+
+  try {
+    const doc = await Cat.findOne({name: req.query.name}).select('name bedsOwned').exec();
+
+    if(!doc) {
+      return res.json({message: 'no cats found'});
+    }
+
+    return res.json({name: doc.name, beds: doc.bedsOwned});
+  }
+  catch(err) {
+    console.log(err);
+    return res.status(500).json({error: 'something went wrong'});
   }
 };
 
 const updateLast = (req, res) => {
-	
+	lastAdded.bedsOwned++;
+
+  const savePromise = lastAdded.save();
+
+  savePromise.then(() => {
+    return res.json({name: lastAdded.name, beds: lastAdded.bedsOwned});
+  });
+
+  savePromise.catch((err) => {
+    console.log(err);
+    return res.status(500).json({error: 'something went wrong'});
+  });
 };
 
 const notFound = (req, res) => {

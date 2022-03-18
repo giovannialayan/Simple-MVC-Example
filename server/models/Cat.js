@@ -19,6 +19,6 @@ const CatSchema = new mongoose.Schema({
     },
 });
 
-let CatModel = mongoose.model('Cat', CatSchema);
+const CatModel = mongoose.model('Cat', CatSchema);
 
 module.exports = CatModel;
